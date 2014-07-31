@@ -1,3 +1,0 @@
-float32[] joints
----
-geometry_msgs/PoseStamped handPose
