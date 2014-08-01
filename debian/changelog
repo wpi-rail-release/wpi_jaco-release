@@ -1,8 +1,0 @@
-ros-indigo-jaco-interaction (0.0.1-0trusty) trusty; urgency=high
-
-  * renamed JACO to WPI packages
-  * Contributors: Russell Toris
-
- -- David Kent <davidkent@wpi.edu>  Thu, 31 Jul 2014 04:00:00 -0000
-
-
