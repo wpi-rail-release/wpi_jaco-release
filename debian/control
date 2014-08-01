@@ -1,0 +1,12 @@
+Source: ros-indigo-wpi-jaco
+Section: misc
+Priority: extra
+Maintainer: David Kent <davidkent@wpi.edu>
+Build-Depends: debhelper (>= 9.0.0), ros-indigo-catkin
+Homepage: http://ros.org/wiki/wpi_jaco
+Standards-Version: 3.9.2
+
+Package: ros-indigo-wpi-jaco
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-indigo-jaco-description, ros-indigo-jaco-interaction, ros-indigo-jaco-sdk, ros-indigo-wpi-jaco-msgs, ros-indigo-wpi-jaco-wrapper
+Description: Metapackage for the ROS Packages for the JACO Arm Developed at WPI
