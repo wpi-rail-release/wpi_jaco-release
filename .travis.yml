@@ -31,4 +31,3 @@ script:
   - cd src/package
   - /opt/ros/hydro/share/xacro/xacro.py jaco_description/urdf/standalone_arm.xacro >> sanity.urdf
   - diff sanity.urdf jaco_description/urdf/standalone_arm.urdf
-
