@@ -1,0 +1,12 @@
+Source: ros-indigo-wpi-jaco-wrapper
+Section: misc
+Priority: extra
+Maintainer: David Kent <davidkent@wpi.edu>
+Build-Depends: debhelper (>= 9.0.0), ros-indigo-actionlib, ros-indigo-catkin, ros-indigo-control-msgs, ros-indigo-controller-manager, ros-indigo-ecl-geometry, ros-indigo-hardware-interface, ros-indigo-jaco-sdk, ros-indigo-roscpp, ros-indigo-sensor-msgs, ros-indigo-tf, ros-indigo-wpi-jaco-msgs
+Homepage: http://ros.org/wiki/wpi_jaco_wrapper
+Standards-Version: 3.9.2
+
+Package: ros-indigo-wpi-jaco-wrapper
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-indigo-actionlib, ros-indigo-control-msgs, ros-indigo-controller-manager, ros-indigo-ecl-geometry, ros-indigo-hardware-interface, ros-indigo-jaco-sdk, ros-indigo-roscpp, ros-indigo-sensor-msgs, ros-indigo-tf, ros-indigo-wpi-jaco-msgs
+Description: ROS Wrapper for the JACO Arm Developed at WPI
