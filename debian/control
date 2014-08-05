@@ -1,0 +1,12 @@
+Source: ros-indigo-jaco-interaction
+Section: misc
+Priority: extra
+Maintainer: David Kent <davidkent@wpi.edu>
+Build-Depends: debhelper (>= 9.0.0), ros-indigo-actionlib, ros-indigo-catkin, ros-indigo-interactive-markers, ros-indigo-roscpp, ros-indigo-sensor-msgs, ros-indigo-wpi-jaco-msgs
+Homepage: http://ros.org/wiki/jaco_interaction
+Standards-Version: 3.9.2
+
+Package: ros-indigo-jaco-interaction
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-indigo-actionlib, ros-indigo-interactive-markers, ros-indigo-roscpp, ros-indigo-sensor-msgs, ros-indigo-wpi-jaco-msgs
+Description: Various Nodes for Teleoperating and Interacting with the JACO Arm
