@@ -4,7 +4,7 @@ project(jaco_interaction)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS actionlib geometry_msgs interactive_markers wpi_jaco_msgs roscpp sensor_msgs visualization_msgs)
+find_package(catkin REQUIRED COMPONENTS actionlib interactive_markers roscpp sensor_msgs wpi_jaco_msgs)
 
 ###################################################
 ## Declare things to be passed to other projects ##
@@ -25,23 +25,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a cpp executable
-add_executable(jaco_joy_teleop src/jaco_joy_teleop.cpp)
-## Specify libraries to link a library or executable target against
-target_link_libraries(jaco_joy_teleop
-  ${catkin_LIBRARIES}
-)
-## Add cmake target dependencies of the executable/library
-add_dependencies(jaco_joy_teleop wpi_jaco_msgs_gencpp)
-
-add_executable(jaco_key_teleop src/jaco_key_teleop.cpp)
-## Specify libraries to link a library or executable target against
-target_link_libraries(jaco_key_teleop
-  ${catkin_LIBRARIES}
-)
-## Add cmake target dependencies of the executable/library
-add_dependencies(jaco_key_teleop wpi_jaco_msgs_gencpp)
-
 add_executable(jaco_interactive_manipulation src/jaco_interactive_manipulation.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(jaco_interactive_manipulation
@@ -55,7 +38,7 @@ add_dependencies(jaco_interactive_manipulation wpi_jaco_msgs_gencpp)
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS jaco_joy_teleop jaco_key_teleop jaco_interactive_manipulation
+install(TARGETS jaco_interactive_manipulation
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
