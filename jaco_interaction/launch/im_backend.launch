@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="jaco_interaction" type="jaco_interactive_manipulation" name="jaco_interactive_manipulation" output="screen" />
-</launch>
