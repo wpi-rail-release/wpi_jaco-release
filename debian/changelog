@@ -1,0 +1,84 @@
+ros-indigo-jaco-sdk (0.0.12-0trusty) trusty; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 20 Jan 2015 05:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.11-0trusty) trusty; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Thu, 18 Dec 2014 05:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.10-0trusty) trusty; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 12 Dec 2014 05:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.9-0trusty) trusty; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 02 Dec 2014 05:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.8-0trusty) trusty; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Wed, 22 Oct 2014 04:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.7-0trusty) trusty; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 19 Sep 2014 04:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.6-0trusty) trusty; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 02 Sep 2014 04:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.5-0trusty) trusty; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Mon, 25 Aug 2014 04:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.4-0trusty) trusty; urgency=high
+
+  * fixes broken include link
+  * correctly links against JACO libraries via cmake
+  * Contributors: Russell Toris
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 05 Aug 2014 04:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.3-0trusty) trusty; urgency=high
+
+  * jaco_sdk now uses single set of include files
+  * Contributors: Russell Toris
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 01 Aug 2014 04:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.2-0trusty) trusty; urgency=high
+
+  * libusb-1.0 added to deps
+  * Contributors: Russell Toris
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 01 Aug 2014 04:00:00 -0000
+
+ros-indigo-jaco-sdk (0.0.1-0trusty) trusty; urgency=high
+
+  * renamed JACO to WPI packages
+  * 0.0.1
+  * changelog updated
+  * cleanup of jaco sdk
+  * Added pickup action to arm control and interactive manipulation
+  * Added WPI to copyright for our changes and put LICENSE files
+  * Initial commit of ros_control jaco driver
+  * Contributors: Mitchell Wills, Russell Toris, Velin Dimitrov, dekent
+
+ -- David Kent <davidkent@wpi.edu>  Thu, 31 Jul 2014 04:00:00 -0000
+
+
