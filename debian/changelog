@@ -1,0 +1,111 @@
+ros-indigo-wpi-jaco-wrapper (0.0.14-0saucy) saucy; urgency=high
+
+  * Added software estop for the arm
+  * Contributors: David Kent
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 06 Feb 2015 05:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.13-0saucy) saucy; urgency=high
+
+  * Result on gripper control action server now reports correctly.
+  * Initial adjustment of gripper action server to fix result feedback
+  * Contributors: David Kent
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 03 Feb 2015 05:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.12-0saucy) saucy; urgency=high
+
+  * Tuned finger position controller, added detection and termination if the fingers are blocked from reaching their goal
+  * Finger position control test
+  * Removed unused debug statement
+  * Adjusted angular and cartesian command callbacks to correctly execute finger position commands when arm joint commands are not specified
+  * Contributors: David Kent
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 20 Jan 2015 05:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.11-0saucy) saucy; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Thu, 18 Dec 2014 05:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.10-0saucy) saucy; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 12 Dec 2014 05:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.9-0saucy) saucy; urgency=high
+
+  * Added service call to get angular position of arm joints
+  * Contributors: David Kent
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 02 Dec 2014 05:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.8-0saucy) saucy; urgency=high
+
+  * tuning
+  * Added check to see if the gripper is already open before the gripper opening loop
+  * Parameter tuning
+  * Added max_curvature parameter for trajectory planning, thresholded gripper opening to prevent a bug that causes gripper opening to terminate late
+  * Contributors: David Kent
+
+ -- David Kent <davidkent@wpi.edu>  Wed, 22 Oct 2014 04:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.7-0saucy) saucy; urgency=high
+
+  * bugfix on gripper closing
+  * Contributors: dekent
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 19 Sep 2014 04:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.6-0saucy) saucy; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 02 Sep 2014 04:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.5-0saucy) saucy; urgency=high
+
+  * release prep
+  * adjusted teleop due to a mode switching bug in the arm; moved teleop to jaco_teleop and included support for segmentation in jaco_interaction
+  * fix for issue with single angular position commands
+  * testing retract command
+  * adjusted retract position
+  * Home and retract actions added to interactive markers
+  * Contributors: Russell Toris, dekent
+
+ -- David Kent <davidkent@wpi.edu>  Mon, 25 Aug 2014 04:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.4-0saucy) saucy; urgency=high
+
+  * documentation
+  * renamed namespace in library
+  * fixed header names in cpp files
+  * renamed wrapper headers
+  * correctly links against JACO libraries via cmake
+  * updated package names in launch files
+  * Contributors: Russell Toris, dekent
+
+ -- David Kent <davidkent@wpi.edu>  Tue, 05 Aug 2014 04:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.3-0saucy) saucy; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 01 Aug 2014 04:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.2-0saucy) saucy; urgency=high
+
+
+
+ -- David Kent <davidkent@wpi.edu>  Fri, 01 Aug 2014 04:00:00 -0000
+
+ros-indigo-wpi-jaco-wrapper (0.0.1-0saucy) saucy; urgency=high
+
+  * renamed JACO to WPI packages
+  * Contributors: Russell Toris
+
+ -- David Kent <davidkent@wpi.edu>  Thu, 31 Jul 2014 04:00:00 -0000
+
+
