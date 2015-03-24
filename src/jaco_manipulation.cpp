@@ -2,168 +2,148 @@
 
 using namespace std;
 
-JacoManipulation::JacoManipulation() :
-    executeGraspServer(n, "jaco_arm/manipulation/grasp", boost::bind(&JacoManipulation::execute_grasp, this, _1),
-                       false), executePickupServer(n, "jaco_arm/manipulation/pickup",
-                                                   boost::bind(&JacoManipulation::execute_pickup, this, _1), false)
+JacoManipulation::JacoManipulation()
 {
-  // Messages
-  cartesianCmdPublisher = n.advertise<wpi_jaco_msgs::CartesianCommand>("jaco_arm/cartesian_cmd", 1);
-  angularCmdPublisher = n.advertise<wpi_jaco_msgs::AngularCommand>("jaco_arm/angular_cmd", 1);
+  loadParameters(n);
 
-  jointStateSubscriber = n.subscribe("jaco_arm/joint_states", 1, &JacoManipulation::jointStateCallback, this);
+  acGripper = new GripperClient(n, arm_name_ + "_arm/fingers_controller/gripper", true);
+  asGripper = new GripperServer(n, arm_name_ + "_arm/manipulation/gripper", boost::bind(&JacoManipulation::execute_gripper, this, _1), false);
+  asLift    = new LiftServer(n, arm_name_ + "_arm/manipulation/lift", boost::bind(&JacoManipulation::execute_lift, this, _1), false);
+
+  // Messages
+  cartesianCmdPublisher = n.advertise<wpi_jaco_msgs::CartesianCommand>(arm_name_ + "_arm/cartesian_cmd", 1);
+  angularCmdPublisher = n.advertise<wpi_jaco_msgs::AngularCommand>(arm_name_ + "_arm/angular_cmd", 1);
+
+  jointStateSubscriber = n.subscribe(arm_name_ + "_arm/joint_states", 1, &JacoManipulation::jointStateCallback, this);
 
   // Services
-  cartesianPositionClient = n.serviceClient<wpi_jaco_msgs::GetCartesianPosition>("jaco_arm/get_cartesian_position");
+  cartesianPositionClient = n.serviceClient<wpi_jaco_msgs::GetCartesianPosition>(arm_name_ + "_arm/get_cartesian_position");
+  eraseTrajectoriesClient = n.serviceClient<std_srvs::Empty>(arm_name_ + "_arm/erase_trajectories");
+
+  ROS_INFO("Waiting for gripper action server...");
+  acGripper->waitForServer();
+  ROS_INFO("Finished waiting for action server.");
 
   // Action servers
-  executeGraspServer.start();
-  executePickupServer.start();
+  asGripper->start();
+  asLift->start();
+}
+
+bool JacoManipulation::loadParameters(const ros::NodeHandle n)
+{
+    ROS_DEBUG("Loading parameters");
+
+    n.param("wpi_jaco/arm_name", arm_name_, std::string("jaco"));
+    n.param("wpi_jaco/gripper_closed", gripper_closed_, 0.0);
+    n.param("wpi_jaco/gripper_open", gripper_open_, 65.0);
+    n.param("wpi_jaco/num_fingers", num_fingers_, 3);
+
+    num_joints_ = num_fingers_ + NUM_JACO_JOINTS;
+
+    joint_pos_.resize(num_joints_);
+
+    ROS_INFO("arm_name: %s", arm_name_.c_str());
+
+    ROS_INFO("Parameters loaded.");
+
+    //! @todo MdL [IMPR]: Return is values are all correctly loaded.
+    return true;
 }
 
 void JacoManipulation::jointStateCallback(const sensor_msgs::JointState msg)
 {
-  for (unsigned int i = 0; i < NUM_JOINTS; i++)
-  {
-    jointPos[i] = msg.position[i];
-  }
+  for (unsigned int i = 0; i < num_joints_; i++)
+    joint_pos_[i] = msg.position[i];
 }
 
-void JacoManipulation::execute_grasp(const wpi_jaco_msgs::ExecuteGraspGoalConstPtr &goal)
+void JacoManipulation::execute_gripper(const rail_manipulation_msgs::GripperGoalConstPtr &goal)
 {
-  if (executePickupServer.isActive())
+  rail_manipulation_msgs::GripperResult result;
+
+  if (asLift->isActive())
   {
-    executeGraspServer.setPreempted();
-    ROS_INFO("Pickup server already running, grasp action preempted");
+    asGripper->setPreempted();
+    ROS_INFO("Lift server already running, grasp action preempted");
     return;
   }
 
-  wpi_jaco_msgs::AngularCommand cmd;
-  cmd.position = false;
-  cmd.armCommand = false;
-  cmd.fingerCommand = true;
-  cmd.repeat = true;
-  cmd.fingers.resize(3);
+  float startingFingerPos[3];
+  for (int i = 0 ; i < num_fingers_ ; i++)
+    startingFingerPos[i] = joint_pos_[NUM_JACO_JOINTS+i];
 
-  //set direction for opening and closing
-  int direction = 1;
-  if (!goal->closeGripper)
-    direction = -1;
-
-  //set finger velocities if they were specified
-  if (goal->limitFingerVelocity)
+  //check if grasp is already finished (for opening case only)
+  if (!goal->close)
   {
-    cmd.fingers[0] = direction * fabs(goal->fingerVelocities.finger1Vel);
-    cmd.fingers[1] = direction * fabs(goal->fingerVelocities.finger2Vel);
-    cmd.fingers[2] = direction * fabs(goal->fingerVelocities.finger3Vel);
+    bool gripper_open = true;
+    for (int i = 0 ; i < num_fingers_ ; i++)
+      gripper_open = gripper_open && startingFingerPos[i] <= GRIPPER_OPEN_THRESHOLD;
+
+    if (gripper_open)
+    {
+      ROS_INFO("Gripper is open.");
+      result.success = true;
+      asGripper->setSucceeded(result, "Open gripper action succeeded, as the gripper is already open.");
+      return;
+    }
+  }
+
+  control_msgs::GripperCommandGoal gripperGoal;
+  if (goal->close)
+    gripperGoal.command.position = gripper_closed_;
+  else
+    gripperGoal.command.position = gripper_open_;
+  acGripper->sendGoal(gripperGoal);
+
+  ros::Rate loopRate(30);
+  while (!acGripper->getState().isDone())
+  {
+    //check for preempt requests from clients
+    if (asGripper->isPreemptRequested() || !ros::ok())
+    {
+      acGripper->cancelAllGoals();
+      //preempt action server
+      asGripper->setPreempted();
+      ROS_INFO("Gripper action server preempted by client");
+      return;
+    }
+    loopRate.sleep();
+  }
+
+  rail_manipulation_msgs::GripperResult serverResult;
+  //success occurs if the gripper has moved, as it is unlikely to reach the final "closed" position when grasping an object
+  //serverResult.success = acGripper->getResult()->reached_goal;
+  if (goal->close)
+  {
+    bool gripper_closing = true;
+    for (int i = 0 ; i < num_fingers_ ; i++)
+      gripper_closing = gripper_closing && joint_pos_[NUM_JACO_JOINTS+i] > startingFingerPos[i];
+
+    serverResult.success = gripper_closing;
   }
   else
   {
-    cmd.fingers[0] = direction * MAX_FINGER_VEL;
-    cmd.fingers[1] = direction * MAX_FINGER_VEL;
-    cmd.fingers[2] = direction * MAX_FINGER_VEL;
+    bool gripper_opening = true;
+    for (int i = 0 ; i < num_fingers_ ; i++)
+      gripper_opening = gripper_opening && joint_pos_[NUM_JACO_JOINTS+i] > startingFingerPos[i];
+
+    serverResult.success = gripper_opening;
   }
-
-  //get initial finger position
-  float prevFingerPos[3];
-  prevFingerPos[0] = jointPos[6];
-  prevFingerPos[1] = jointPos[7];
-  prevFingerPos[2] = jointPos[8];
-
-  float currentFingerPos[3];
-  currentFingerPos[0] = prevFingerPos[0];
-  currentFingerPos[1] = prevFingerPos[1];
-  currentFingerPos[2] = prevFingerPos[2];
-
-  double prevCheckTime = ros::Time::now().toSec();
-  bool finishedGrasp = false;
-
-  //check if grasp is already finished (for opening case only)
-  if (!goal->closeGripper)
-  {
-    if (currentFingerPos[0] <= GRIPPER_OPEN_THRESHOLD && currentFingerPos[1] <= GRIPPER_OPEN_THRESHOLD && currentFingerPos[2] <= GRIPPER_OPEN_THRESHOLD)
-    {
-      ROS_INFO("Gripper already open.");
-      finishedGrasp = true;
-    }
-  }
-  
-  while (!finishedGrasp)
-  {
-    //check for preempt requests from clients
-    if (executeGraspServer.isPreemptRequested() || !ros::ok())
-    {
-      //stop gripper control
-      cmd.fingers[0] = 0.0;
-      cmd.fingers[1] = 0.0;
-      cmd.fingers[2] = 0.0;
-      angularCmdPublisher.publish(cmd);
-
-      //preempt action server
-      executeGraspServer.setPreempted();
-      ROS_INFO("Grasp action server preempted by client");
-
-      return;
-    }
-
-    angularCmdPublisher.publish(cmd);
-
-    if (ros::Time::now().toSec() - prevCheckTime > .25)	//occaisionally check to see if the fingers have stopped moving
-    {
-      prevCheckTime = ros::Time::now().toSec();
-      currentFingerPos[0] = jointPos[6];
-      currentFingerPos[1] = jointPos[7];
-      currentFingerPos[2] = jointPos[8];
-
-      if (!goal->closeGripper)
-      {
-        if (currentFingerPos[0] <= GRIPPER_OPEN_THRESHOLD && currentFingerPos[1] <= GRIPPER_OPEN_THRESHOLD && currentFingerPos[2] <= GRIPPER_OPEN_THRESHOLD)
-        {
-          finishedGrasp = true;
-        }
-      }
-      //grasp is finished if fingers haven't moved since the last check
-      if ((fabs(prevFingerPos[0] - currentFingerPos[0]) + fabs(prevFingerPos[1] - currentFingerPos[1])
-          + fabs(prevFingerPos[2] - currentFingerPos[2])) == 0.0)
-      {
-        finishedGrasp = true;
-      }
-      else
-      {
-        prevFingerPos[0] = currentFingerPos[0];
-        prevFingerPos[1] = currentFingerPos[1];
-        prevFingerPos[2] = currentFingerPos[2];
-      }
-    }
-  }
-
-  //stop arm
-  cmd.fingers[0] = 0.0;
-  cmd.fingers[1] = 0.0;
-  cmd.fingers[2] = 0.0;
-  angularCmdPublisher.publish(cmd);
-
-  wpi_jaco_msgs::ExecuteGraspResult result;
-  result.fingerJoints.resize(3);
-  result.fingerJoints.at(0) = jointPos[6];
-  result.fingerJoints.at(1) = jointPos[7];
-  result.fingerJoints.at(2) = jointPos[8];
-  executeGraspServer.setSucceeded(result);
-  ROS_INFO("Grasp execution complete");
+  asGripper->setSucceeded(serverResult);
+  ROS_INFO("Gripper action finished.");
 }
 
-void JacoManipulation::execute_pickup(const wpi_jaco_msgs::ExecutePickupGoalConstPtr &goal)
+void JacoManipulation::execute_lift(rail_manipulation_msgs::LiftGoalConstPtr const &goal)
 {
-  if (executeGraspServer.isActive())
+  if (asGripper->isActive())
   {
-    executePickupServer.setPreempted();
-    ROS_INFO("Grasp server already running, pickup action preempted");
+    asLift->setPreempted();
+    ROS_INFO("Gripper server already running, lift action preempted");
     return;
   }
 
   //get initial end effector height
   wpi_jaco_msgs::GetCartesianPosition srv;
-  wpi_jaco_msgs::ExecutePickupResult result;
+  rail_manipulation_msgs::LiftResult result;
   if (cartesianPositionClient.call(srv))
   {
     float initialZ = srv.response.pos.linear.z;
@@ -177,25 +157,13 @@ void JacoManipulation::execute_pickup(const wpi_jaco_msgs::ExecutePickupGoalCons
     cmd.fingers.resize(3);
     cmd.arm.linear.x = 0.0;
     cmd.arm.linear.y = 0.0;
-    if (goal->setLiftVelocity)
-      cmd.arm.linear.z = goal->liftVelocity;
-    else
-      cmd.arm.linear.z = DEFAULT_LIFT_VEL;
+    cmd.arm.linear.z = DEFAULT_LIFT_VEL;
     cmd.arm.angular.x = 0.0;
     cmd.arm.angular.y = 0.0;
     cmd.arm.angular.z = 0.0;
-    if (goal->limitFingerVelocity)
-    {
-      cmd.fingers[0] = fabs(goal->fingerVelocities.finger1Vel);
-      cmd.fingers[1] = fabs(goal->fingerVelocities.finger2Vel);
-      cmd.fingers[2] = fabs(goal->fingerVelocities.finger3Vel);
-    }
-    else
-    {
-      cmd.fingers[0] = MAX_FINGER_VEL;
-      cmd.fingers[1] = MAX_FINGER_VEL;
-      cmd.fingers[2] = MAX_FINGER_VEL;
-    }
+    cmd.fingers[0] = MAX_FINGER_VEL;
+    cmd.fingers[1] = MAX_FINGER_VEL;
+    cmd.fingers[2] = MAX_FINGER_VEL;
 
     bool finished = false;
     float currentZ;
@@ -206,24 +174,18 @@ void JacoManipulation::execute_pickup(const wpi_jaco_msgs::ExecutePickupGoalCons
     while (!finished)
     {
       //check for preempt requests from clients
-      if (executePickupServer.isPreemptRequested() || !ros::ok())
+      if (asLift->isPreemptRequested() || !ros::ok())
       {
         //stop pickup action
-        cmd.fingers.resize(3);
-        cmd.arm.linear.x = 0.0;
-        cmd.arm.linear.y = 0.0;
-        cmd.arm.linear.z = 0.0;
-        cmd.arm.angular.x = 0.0;
-        cmd.arm.angular.y = 0.0;
-        cmd.arm.angular.z = 0.0;
-        cmd.fingers[0] = 0.0;
-        cmd.fingers[1] = 0.0;
-        cmd.fingers[2] = 0.0;
-        cartesianCmdPublisher.publish(cmd);
+        std_srvs::Empty emptySrv;
+        if(!eraseTrajectoriesClient.call(emptySrv))
+        {
+          ROS_INFO("Could not call erase trajectories service");
+        }
 
         //preempt action server
-        executePickupServer.setPreempted();
-        ROS_INFO("Pickup action server preempted by client");
+        asLift->setPreempted();
+        ROS_INFO("Lift action server preempted by client");
 
         return;
       }
@@ -236,7 +198,7 @@ void JacoManipulation::execute_pickup(const wpi_jaco_msgs::ExecutePickupGoalCons
       }
       else
       {
-        ROS_INFO("Couldn't call cartesian position server");
+        ROS_INFO("Couldn't call Cartesian position server");
         result.success = false;
         break;
       }
@@ -254,25 +216,19 @@ void JacoManipulation::execute_pickup(const wpi_jaco_msgs::ExecutePickupGoalCons
     }
 
     //stop arm
-    cmd.fingers.resize(3);
-    cmd.arm.linear.x = 0.0;
-    cmd.arm.linear.y = 0.0;
-    cmd.arm.linear.z = 0.0;
-    cmd.arm.angular.x = 0.0;
-    cmd.arm.angular.y = 0.0;
-    cmd.arm.angular.z = 0.0;
-    cmd.fingers[0] = 0.0;
-    cmd.fingers[1] = 0.0;
-    cmd.fingers[2] = 0.0;
-    cartesianCmdPublisher.publish(cmd);
+    std_srvs::Empty emptySrv;
+    if(!eraseTrajectoriesClient.call(emptySrv))
+    {
+      ROS_INFO("Could not call erase trajectories service");
+    }
   }
   else
   {
-    ROS_INFO("Couldn't call cartesian position server");
+    ROS_INFO("Couldn't call Cartesian position server");
     result.success = false;
   }
 
-  executePickupServer.setSucceeded(result);
+  asLift->setSucceeded(result);
   ROS_INFO("Pickup execution complete");
 
 }
