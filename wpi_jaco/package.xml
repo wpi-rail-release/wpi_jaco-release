@@ -1,6 +1,6 @@
 <package>
   <name>wpi_jaco</name>
-  <version>0.0.15</version>
+  <version>0.0.16</version>
   <description>Metapackage for the ROS Packages for the JACO Arm Developed at WPI</description>
 
   <author email="rctoris@wpi.edu">Russell Toris</author>
@@ -17,6 +17,7 @@
   
   <run_depend>jaco_description</run_depend>
   <run_depend>jaco_interaction</run_depend>
+  <run_depend>jaco_moveit_config</run_depend>
   <run_depend>jaco_sdk</run_depend>
   <run_depend>jaco_teleop</run_depend>
   <run_depend>wpi_jaco_msgs</run_depend>
