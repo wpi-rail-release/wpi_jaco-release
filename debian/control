@@ -1,0 +1,12 @@
+Source: ros-indigo-mico-description
+Section: misc
+Priority: extra
+Maintainer: Mathijs de Langen <langen@robot-rose.nl>
+Build-Depends: debhelper (>= 9.0.0), ros-indigo-catkin
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-indigo-mico-description
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-indigo-joint-state-publisher, ros-indigo-robot-state-publisher, ros-indigo-xacro
+Description: 3D Model and URDF of the Kinova MICO Arm
