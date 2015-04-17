@@ -1,0 +1,12 @@
+Source: ros-indigo-jaco-teleop
+Section: misc
+Priority: extra
+Maintainer: David Kent <davidkent@wpi.edu>
+Build-Depends: debhelper (>= 9.0.0), ros-indigo-catkin, ros-indigo-roscpp, ros-indigo-sensor-msgs, ros-indigo-wpi-jaco-msgs
+Homepage: http://ros.org/wiki/jaco_teleop
+Standards-Version: 3.9.2
+
+Package: ros-indigo-jaco-teleop
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-indigo-roscpp, ros-indigo-sensor-msgs, ros-indigo-wpi-jaco-msgs
+Description: Various Nodes for Teleoperating the JACO Arm
