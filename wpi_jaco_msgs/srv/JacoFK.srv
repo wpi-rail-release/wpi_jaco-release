@@ -1,3 +1,0 @@
-float32[] joints                      # positions of joints (rad)
----
-geometry_msgs/PoseStamped handPose    # End effector pose (m, rad)
