@@ -1,3 +1,34 @@
+## wpi_jaco (indigo) - 0.0.24-0
+
+The packages in the `wpi_jaco` repository were released into the `indigo` distro by running `/usr/bin/bloom-release --rosdistro indigo --track indigo wpi_jaco` on `Tue, 18 Aug 2015 14:30:19 -0000`
+
+These packages were released:
+- `jaco_description`
+- `jaco_interaction`
+- `jaco_moveit_config`
+- `jaco_sdk`
+- `jaco_teleop`
+- `mico_description`
+- `mico_moveit_config`
+- `wpi_jaco`
+- `wpi_jaco_msgs`
+- `wpi_jaco_wrapper`
+
+Version of package(s) in repository `wpi_jaco`:
+- upstream repository: https://github.com/RIVeR-Lab/wpi_jaco.git
+- release repository: https://github.com/wpi-rail-release/wpi_jaco-release.git
+- rosdistro version: `0.0.23-0`
+- old version: `0.0.23-0`
+- new version: `0.0.24-0`
+
+Versions of tools used:
+- bloom version: `0.5.20`
+- catkin_pkg version: `0.2.8`
+- rosdep version: `0.11.2`
+- rosdistro version: `0.4.2`
+- vcstools version: `0.1.36`
+
+
 ## wpi_jaco (indigo) - 0.0.23-0
 
 The packages in the `wpi_jaco` repository were released into the `indigo` distro by running `/usr/bin/bloom-release --rosdistro indigo --track indigo wpi_jaco` on `Mon, 04 May 2015 12:10:05 -0000`
